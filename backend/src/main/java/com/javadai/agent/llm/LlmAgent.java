@@ -123,10 +123,26 @@ public class LlmAgent {
                     || normalizedInstruction.contains("inspect"));
         if (asksToInspectBoth) {
             try {
-                userContent += "\\n\\nBACKEND-GENERATED PROJECT STRUCTURE (not user-provided):"
-                        + "\\n[backend]\\n" + code.tree("backend")
-                        + "\\n[frontend]\\n" + code.tree("frontend")
-                        + "\\nYou must use read_file on important files in these trees before claiming to understand the project.";
+                userContent += "\n\nBACKEND-GENERATED PROJECT STRUCTURE (not user-provided):"
+                        + "\n[backend]\n" + code.tree("backend")
+                        + "\n[frontend]\n" + code.tree("frontend")
+                        + "\n\nIMPORTANT PROJECT FILES (read directly by backend):";
+                for (String file : List.of(
+                        "backend/pom.xml",
+                        "backend/src/main/resources/application.yaml",
+                        "backend/src/main/resources/application.yml",
+                        "frontend/package.json",
+                        "frontend/angular.json"
+                )) {
+                    try {
+                        String content = files.readFile(file);
+                        userContent += "\n\n--- " + file + " ---\n"
+                                + (content.length() > 10000 ? content.substring(0, 10000) + "\n...(truncated)" : content);
+                    } catch (Exception ignored) {
+                        // Optional configuration files differ between project layouts.
+                    }
+                }
+                userContent += "\n\nUse the supplied tree and file contents as source of truth. Read additional source files with tools before claiming full understanding.";
             } catch (Exception e) {
                 userContent += "\\n\\nCould not read project folders: " + e.getMessage();
             }
