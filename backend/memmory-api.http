@@ -1,0 +1,27 @@
+
+### 1. Create Memory
+POST http://localhost:8080/api/memories
+Content-Type: application/json
+
+{
+  "memoryType": "EXPERIENCE",
+  "title": "First JavadAI Memory",
+  "content": "JavadAI successfully connected to PostgreSQL and Flyway.",
+  "source": "manual-test",
+  "importance": 5
+}
+
+### 2. Get Recent Memories
+GET http://localhost:8080/api/memories?limit=20
+
+### 3. Search Memories
+GET http://localhost:8080/api/memories/search?keyword=PostgreSQL&page=0&size=10
+
+### 4. Get Memory By ID
+GET http://localhost:8080/api/memories/REPLACE_WITH_MEMORY_UUID
+
+### 5. Get Memories By Type
+GET http://localhost:8080/api/memories/type/EXPERIENCE?page=0&size=10
+
+### 6. Soft Delete Memory
+DELETE http://localhost:8080/api/memories/REPLACE_WITH_MEMORY_UUID

@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="63e38784-1759-4653-bab4-47a5a3b877bb" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitattributes" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/memmory-api.http" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/mvnw" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/mvnw.cmd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/JavadAiApplication.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/Agent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/AgentAskRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/AgentController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/execution/ExecutionCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/execution/ExecutionResult.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/intent/IntentDetector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/intent/IntentType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/llm/CodeTool.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/llm/LlmAgent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/llm/OllamaClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/memory/Memory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/memory/MemoryController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/memory/MemoryRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/memory/MemoryService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/memory/MemoryType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/memory/dto/CreateMemoryRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/memory/dto/MemoryResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/project/JavaClassTemplate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/project/JavaProjectGenerator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/project/JavaProjectRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/skills/Skill.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/skills/SkillRegistry.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/skills/programming/JavaProjectSkill.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/task/AgentTask.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/task/TaskManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/task/TaskStatus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/task/TaskStep.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/tools/ApplicationTool.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/tools/FileTool.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/tools/ToolExecutor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/tools/WindowsCommandTool.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/workflow/WorkflowAction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/workflow/WorkflowExecutor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/workflow/WorkflowPlan.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/workflow/WorkflowPlanner.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/workflow/WorkflowStep.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/workspace/FileChangeProposalController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/workspace/FileChangeProposalService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/workspace/WorkspaceController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/workspace/WorkspaceManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/javadai/config/CorsConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V1__create_memories.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/javadai/JavadAiApplicationTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/app/core/agent-api.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/app/core/monaco-loader.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/app/core/workspace-api.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/app/features/workspace/workspace.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/app/features/workspace/workspace.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/app/features/workspace/workspace.component.ts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="114" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000001835057488" />
+      <entry key="S2" value="1.0232427777890296" />
+      <entry key="S5" value="1.310690521468087" />
+      <entry key="S10" value="1.8470557221504686" />
+      <entry key="S30" value="2.88139608982158" />
+      <entry key="S60" value="3.3597937761009153" />
+      <entry key="M2" value="3.6560375630057993" />
+      <entry key="M5" value="3.856140174575788" />
+      <entry key="M10" value="3.9269745313426996" />
+      <entry key="M15" value="3.951069057723835" />
+      <entry key="M30" value="3.9754099052774428" />
+      <entry key="H1" value="3.9876765841600315" />
+      <entry key="H2" value="4.001576279153155" />
+      <entry key="H4" value="4.587721808537561" />
+      <entry key="D1" value="35.589675331459176" />
+      <entry key="W1" value="78.46325213297689" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="2.3613968236229463E-5" />
+      <entry key="MS500" value="0.12212714641915712" />
+      <entry key="S2" value="0.8280934866818472" />
+      <entry key="S5" value="1.3741462367943682" />
+      <entry key="S10" value="1.6513046164339962" />
+      <entry key="S30" value="1.874624237498917" />
+      <entry key="S60" value="1.9360846667385114" />
+      <entry key="M2" value="1.967728730371664" />
+      <entry key="M5" value="1.9870153467753509" />
+      <entry key="M10" value="1.9934949083436586" />
+      <entry key="M15" value="1.9956604300328125" />
+      <entry key="M30" value="1.9978287925356575" />
+      <entry key="H1" value="1.9989140925624929" />
+      <entry key="H2" value="1.9997511097639176" />
+      <entry key="H4" value="2.0242150258765426" />
+      <entry key="D1" value="4.473862935340222" />
+      <entry key="W1" value="10.07785060304863" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.9265880618908515" />
+      <entry key="MS500" value="0.9883106381313453" />
+      <entry key="S2" value="1.2980500101758068" />
+      <entry key="S5" value="2.067412579245556" />
+      <entry key="S10" value="2.9394980747611896" />
+      <entry key="S30" value="4.3895963424080655" />
+      <entry key="S60" value="5.064707755617746" />
+      <entry key="M2" value="5.492424609785077" />
+      <entry key="M5" value="5.786215807438557" />
+      <entry key="M10" value="5.891206768449743" />
+      <entry key="M15" value="5.9270402060171" />
+      <entry key="M30" value="5.963302447594666" />
+      <entry key="H1" value="5.981599422640613" />
+      <entry key="H2" value="5.998825698070317" />
+      <entry key="H4" value="6.6106780349409915" />
+      <entry key="D1" value="40.06325697937908" />
+      <entry key="W1" value="88.54104211135034" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3MVRiP2W0KCPmm3uz33tmltxjkE" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.JavadAiApplication.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.generated-requests | #54.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.generated-requests | #55.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.memmory-api | 1. Create Memory.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.memmory-api | 2. Get Recent Memories.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.memmory-api | 3. Search Memories.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.memmory-api | 4. Get Memory By ID.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.memmory-api | 5. Get Memories By Type.executor&quot;: &quot;Run&quot;,
+    &quot;HTTP Request.memmory-api | 6. Soft Delete Memory.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.javadai [clean,install].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.JavadAiApplication.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/project/private/javadAI/frontend/src/app/features/workspace&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\project\\private\\javadAI\\frontend\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\project\private\javadAI\frontend\src\app\features\workspace" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\project\private\javadAI\backend" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.JavadAiApplication">
+    <configuration name="memmory-api | 3. Search Memories" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/memmory-api.http" executionIdentifier="3. Search Memories" index="3" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="memmory-api | 4. Get Memory By ID" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/memmory-api.http" executionIdentifier="4. Get Memory By ID" index="4" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="memmory-api | 5. Get Memories By Type" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/memmory-api.http" executionIdentifier="5. Get Memories By Type" index="5" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="memmory-api | 6. Soft Delete Memory" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/memmory-api.http" executionIdentifier="6. Soft Delete Memory" index="6" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="JavadAiApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="javadai" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.javadai.JavadAiApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.javadai.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.JavadAiApplication" />
+        <item itemvalue="HTTP Request.memmory-api | 6. Soft Delete Memory" />
+        <item itemvalue="HTTP Request.memmory-api | 5. Get Memories By Type" />
+        <item itemvalue="HTTP Request.memmory-api | 4. Get Memory By ID" />
+        <item itemvalue="HTTP Request.memmory-api | 3. Search Memories" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.24374.151" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.24374.151" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="63e38784-1759-4653-bab4-47a5a3b877bb" name="Changes" comment="" />
+      <created>1795433877019</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1795433877019</updated>
+      <workItem from="1795433878087" duration="5817000" />
+      <workItem from="1795439779913" duration="39113000" />
+      <workItem from="1795691229688" duration="1408000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/AgentController.java</url>
+          <line>23</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/javadai/agent/Agent.java</url>
+          <line>49</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

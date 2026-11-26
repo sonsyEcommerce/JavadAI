@@ -1,0 +1,249 @@
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">J</div>
+      <div class="brand-info">
+        <h1>JavadAI</h1>
+        <span>Personal AI Assistant</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="section-label">فضای اصلی</span>
+
+      @for (item of navItems; track item.id) {
+        <button
+          class="nav-item"
+          [class.active]="selectedNav() === item.id"
+          (click)="selectNav(item.id)">
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </button>
+      }
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="workspace-card">
+        <div class="workspace-icon">▣</div>
+        <div>
+          <strong>Workspace</strong>
+          <span>فضای کاری محلی</span>
+        </div>
+        <span class="online-dot"></span>
+      </div>
+
+      <div class="user-profile">
+        <div class="avatar">J</div>
+        <div class="user-info">
+          <strong>Developer</strong>
+          <span>Local Environment</span>
+        </div>
+        <span class="profile-more">•••</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+      <div class="page-title">
+        <span class="breadcrumb">JavadAI</span>
+        <span class="breadcrumb-separator">/</span>
+        <strong>
+          {{
+            activeMode() === 'chat'
+              ? 'گفتگو'
+              : activeMode() === 'terminal'
+                ? 'ترمینال'
+                : 'فضای کاری'
+          }}
+        </strong>
+      </div>
+
+      <div class="topbar-actions">
+        <div class="system-status">
+          <span class="online-dot"></span>
+          <span>آماده به کار</span>
+        </div>
+        <button class="icon-button" title="اعلان‌ها">♧</button>
+      </div>
+    </header>
+
+    <section class="content-area">
+
+      @if (activeMode() !== 'workspace') {
+        <div class="mode-switch">
+          <button
+            [class.selected]="activeMode() === 'chat'"
+            (click)="activeMode.set('chat'); selectedNav.set('chat')">
+            <span>◈</span>
+            گفتگو
+          </button>
+
+          <button
+            [class.selected]="activeMode() === 'terminal'"
+            (click)="activeMode.set('terminal'); selectedNav.set('terminal')">
+            <span>⌘</span>
+            ترمینال
+          </button>
+        </div>
+      }
+
+      @if (activeMode() === 'chat') {
+        <section class="chat-container">
+
+          @if (messages().length === 0) {
+            <div class="welcome-section">
+              <div class="welcome-orb">
+                <div class="orb-inner">J</div>
+              </div>
+
+              <span class="welcome-eyebrow">PERSONAL AI WORKSPACE</span>
+
+              <h2>سلام، خوش اومدی 👋</h2>
+
+              <p class="welcome-description">
+                من JavadAI هستم؛ دستیار هوشمند شخصی تو.
+                <br/>
+                از گفتگو و مدیریت پروژه تا اجرای وظایف برنامه‌نویسی،
+                همه‌چیز در یک محیط.
+              </p>
+
+              <div class="suggestions">
+                <button (click)="useSuggestion('وضعیت پروژه من را بررسی کن')">
+                  <span>◷</span>
+                  وضعیت پروژه من را بررسی کن
+                </button>
+
+                <button (click)="useSuggestion('یک پروژه جدید Java بساز')">
+                  <span>⌘</span>
+                  یک پروژه جدید Java بساز
+                </button>
+
+                <button (click)="useSuggestion('فایل‌های Workspace را بررسی کن')">
+                  <span>▣</span>
+                  فایل‌های Workspace را بررسی کن
+                </button>
+
+                <button (click)="useSuggestion('چه کارهایی می‌توانی انجام دهی؟')">
+                  <span>✧</span>
+                  قابلیت‌های JavadAI چیست؟
+                </button>
+              </div>
+            </div>
+          }
+
+          <div class="messages-list">
+            @for (message of messages(); track message.id) {
+              <div class="message-row" [class.user-message]="message.role === 'user'">
+                <div class="message-avatar">
+                  {{ message.role === 'user' ? 'J' : 'AI' }}
+                </div>
+
+                <div class="message-body">
+                  <div class="message-meta">
+                    <strong>{{ message.role === 'user' ? 'شما' : 'JavadAI' }}</strong>
+                    <span>{{ message.time }}</span>
+                  </div>
+                  <div class="message-bubble">{{ message.content }}</div>
+
+                  @if (message.role === 'assistant' && message.status) {
+                    <div class="task-status" [attr.data-status]="message.status">
+                      <span class="status-dot"></span>
+                      {{ getStatusLabel(message.status) }}
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="composer-wrapper">
+            <div class="composer">
+              <textarea
+                rows="2"
+                placeholder="از JavadAI چیزی بپرس یا کاری بخواه..."
+                [ngModel]="messageInput()"
+                (ngModelChange)="messageInput.set($event)"
+                (keydown)="handleComposerKeydown($event)">
+              </textarea>
+
+              <div class="composer-footer">
+                <div class="composer-tools">
+                  <span class="composer-hint">Enter برای ارسال</span>
+                  <span class="composer-mode">✧ AI Assistant</span>
+                </div>
+
+                <button
+                  class="send-button"
+                  [disabled]="!messageInput().trim() || isSending()"
+                  (click)="sendMessage()">
+                  <span>{{ isSending() ? 'در حال پردازش...' : 'ارسال' }}</span>
+                  <span>{{ isSending() ? '◌' : '➤' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <p class="disclaimer">
+              JavadAI به Backend محلی متصل است.
+              اجرای دستورات و عملیات در محدوده قابلیت‌های فعال‌شده انجام می‌شود.
+            </p>
+          </div>
+        </section>
+      }
+
+      @if (activeMode() === 'terminal') {
+        <section class="terminal-container">
+          <div class="terminal-heading">
+            <div>
+              <h2>ترمینال JavadAI</h2>
+              <p>محیط آزمایشی دستورات</p>
+            </div>
+            <span class="terminal-badge">DEMO MODE</span>
+          </div>
+
+          <div class="terminal-window">
+            <div class="terminal-titlebar">
+              <div class="window-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span>javad-ai-terminal</span>
+            </div>
+
+            <div class="terminal-output">
+              @for (line of terminalHistory(); track $index) {
+                <div class="terminal-line">{{ line }}</div>
+              }
+            </div>
+
+            <div class="terminal-input-row">
+              <span class="terminal-prompt">javadAI $</span>
+              <input
+                type="text"
+                placeholder="دستور خود را وارد کنید..."
+                [ngModel]="terminalInput()"
+                (ngModelChange)="terminalInput.set($event)"
+                (keydown.enter)="runTerminalCommand()"/>
+              <button (click)="runTerminalCommand()">اجرا</button>
+            </div>
+          </div>
+
+          <p class="terminal-notice">
+            <span>ⓘ</span>
+            این ترمینال فعلاً دستورات را واقعاً در ویندوز اجرا نمی‌کند.
+          </p>
+        </section>
+      }
+
+      @if (activeMode() === 'workspace') {
+        <app-workspace />
+      }
+
+      @if (activeMode() === 'chat' && messages().length > 0) {
+        <div class="chat-bottom-spacer"></div>
+      }
+
+    </section>
+  </main>
+</div>

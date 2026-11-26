@@ -1,0 +1,175 @@
+
+<section class="workspace-container">
+
+  <header class="workspace-header">
+    <div>
+      <span class="workspace-eyebrow">PROJECT MANAGEMENT</span>
+      <h2>فضای کاری</h2>
+      <p>مدیریت فایل‌ها و پوشه‌های پروژه</p>
+    </div>
+
+    <button class="refresh-button" (click)="loadFiles(currentPath())">
+      ↻ بروزرسانی
+    </button>
+  </header>
+
+  <section class="workspace-settings">
+    <div class="settings-icon">▣</div>
+
+    <div class="settings-info">
+      <strong>Workspace فعال</strong>
+      <span>{{ workspacePath() }}</span>
+    </div>
+
+    <div class="workspace-change">
+      <input
+        type="text"
+        placeholder="مسیر جدید پروژه..."
+        [value]="newWorkspacePath()"
+        (input)="newWorkspacePath.set($any($event.target).value)"
+        (keydown.enter)="changeWorkspace()" />
+
+      <button
+        [disabled]="!newWorkspacePath().trim() || changingWorkspace()"
+        (click)="changeWorkspace()">
+        {{ changingWorkspace() ? 'در حال تغییر...' : 'تغییر مسیر' }}
+      </button>
+    </div>
+  </section>
+
+  @if (error()) {
+    <div class="workspace-error">⚠ {{ error() }}</div>
+  }
+
+  <section class="file-explorer">
+
+    <div class="explorer-toolbar">
+      <div class="explorer-title">
+        <span>📂</span>
+        <strong>Project Explorer</strong>
+      </div>
+
+      <button
+        [disabled]="!currentPath() || loading()"
+        (click)="goBack()">
+        ↑ پوشه والد
+      </button>
+    </div>
+
+    <div class="current-directory">
+      <span>مسیر فعلی:</span>
+      <strong>{{ currentPath() || '/' }}</strong>
+    </div>
+
+    @if (loading()) {
+      <div class="explorer-empty">در حال بارگذاری فایل‌ها...</div>
+    } @else if (files().length === 0) {
+      <div class="explorer-empty">این پوشه خالی است.</div>
+    } @else {
+      <div class="file-list">
+
+        <div class="file-list-header">
+          <span>نام</span>
+          <span>نوع</span>
+          <span>عملیات</span>
+        </div>
+
+        @for (file of files(); track file.path) {
+          <div
+            class="file-row"
+            [class.selected-file]="selectedFilePath() === file.path">
+
+            <div class="file-name">
+              <span class="file-icon">{{ getFileIcon(file) }}</span>
+              <strong>{{ file.name }}</strong>
+            </div>
+
+            <span class="file-type">
+              {{ file.directory ? 'پوشه' : 'فایل' }}
+            </span>
+
+            <button
+              class="open-file-button"
+              (click)="openFile(file)">
+              {{ file.directory ? 'باز کردن' : 'مشاهده / ویرایش' }}
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+  </section>
+
+  @if (tabs().length > 0) {
+
+    <section class="file-editor" [hidden]="tabs().length === 0">
+
+      <header class="editor-header">
+        <div class="editor-tabs">
+          @for (tab of tabs(); track tab.path) {
+            <div
+              class="editor-tab"
+              [class.active]="selectedFilePath() === tab.path"
+              (click)="activateTab(tab.path)"
+            >
+              <span>{{ tab.name }}</span>
+
+              @if (tab.dirty) {
+                <span class="dirty-indicator">●</span>
+              }
+
+              <button
+                class="tab-close"
+                title="بستن تب"
+                (click)="closeTab(tab.path); $event.stopPropagation()"
+              >
+                ×
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="editor-actions">
+          @if (fileSaved()) {
+            <span class="saved-status">✓ ذخیره شد</span>
+          }
+
+          <button
+            class="save-button"
+            [disabled]="saving()"
+            (click)="saveFile()"
+          >
+            {{ saving() ? 'در حال ذخیره...' : '💾 ذخیره (Ctrl + S)' }}
+          </button>
+
+          <button
+            class="close-editor-button"
+            (click)="closeFile()"
+          >
+            ✕ بستن
+          </button>
+        </div>
+      </header>
+
+      @if (fileLoading()) {
+        <div class="editor-loading">در حال بارگذاری فایل...</div>
+      }
+
+      <div #editorHost class="monaco-host"></div>
+
+      @if (fileError()) {
+        <div class="editor-error">{{ fileError() }}</div>
+      }
+
+    </section>
+
+  }
+
+  <footer class="workspace-footer">
+    <span class="online-dot"></span>
+    <span>{{ files().length }} مورد در پوشه فعلی</span>
+    <span>•</span>
+    <span>Local Workspace</span>
+  </footer>
+
+</section>
