@@ -30,7 +30,7 @@ public class OllamaClient {
     public Map<String, Object> chat(List<Map<String, Object>> messages, List<Map<String, Object>> tools) {
         Map<String, Object> body = Map.of(
                 "model", model, "messages", messages, "tools", tools, "stream", false,
-                "options", Map.of("temperature", 0.2));
+                "options", Map.of("temperature", 0.1, "num_ctx", 16384, "num_predict", 4096));
         Map<String, Object> res = client.post().uri("/api/chat").body(body).retrieve().body(Map.class);
         if (res == null || res.get("message") == null) throw new IllegalStateException("Empty response from Ollama");
         return (Map<String, Object>) res.get("message");
