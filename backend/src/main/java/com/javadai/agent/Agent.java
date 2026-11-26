@@ -186,14 +186,19 @@ public class Agent {
     }
 
     private boolean isProjectUnderstandingRequest(String instruction) {
-        String text = instruction == null ? "" : instruction.toLowerCase(java.util.Locale.ROOT);
+        String text = instruction == null ? "" : instruction.toLowerCase(java.util.Locale.ROOT)
+                .replace('ي', 'ی').replace('ك', 'ک');
         boolean mentionsProject = text.contains("backend") || text.contains("frontend")
                 || text.contains("angular") || text.contains("spring boot")
-                || text.contains("معماری") || text.contains("ساختار پروژه");
+                || text.contains("معماری") || text.contains("ساختار پروژه")
+                || text.contains("پروژه") || text.contains("بک") || text.contains("فرانت");
         boolean asksToUnderstand = text.contains("تحلیل") || text.contains("بررسی")
                 || text.contains("بخوان") || text.contains("بخون") || text.contains("توضیح")
-                || text.contains("ارتباط") || text.contains("معماری") || text.contains("analyze")
-                || text.contains("inspect") || text.contains("explain") || text.contains("read");
+                || text.contains("ارتباط") || text.contains("معماری") || text.contains("پوشه")
+                || text.contains("در مورد چیست") || text.contains("درباره چیست")
+                || text.contains("چیست") || text.contains("هدف") || text.contains("what is")
+                || text.contains("purpose") || text.contains("analyze") || text.contains("inspect")
+                || text.contains("explain") || text.contains("read");
         return mentionsProject && asksToUnderstand;
     }
 
