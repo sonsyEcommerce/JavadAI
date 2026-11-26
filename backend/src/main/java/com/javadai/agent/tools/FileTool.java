@@ -16,6 +16,10 @@ import java.util.stream.Stream;
 public class FileTool {
 
 
+    private static final java.util.Set<String> IGNORED_DIRS = java.util.Set.of(
+            ".git", "node_modules", "target", "dist", "build", ".angular", ".idea", ".vscode"
+    );
+
     private final WorkspaceManager workspaceManager;
 
     public FileTool(WorkspaceManager workspaceManager) {
@@ -142,15 +146,25 @@ public class FileTool {
             throw new IllegalArgumentException("Search keyword is required.");
         }
 
-        try (Stream<Path> stream = Files.walk(workspaceManager.getRoot())) {
+        Path root = workspaceManager.getRoot();
+        String searchKeyword = keyword.toLowerCase(java.util.Locale.ROOT);
+
+        try (Stream<Path> stream = Files.walk(root, 12)) {
             return stream
                     .filter(path -> !Files.isSymbolicLink(path))
+                    .filter(path -> {
+                        Path relativePath = root.relativize(path);
+                        for (Path part : relativePath) {
+                            if (IGNORED_DIRS.contains(part.toString())) return false;
+                        }
+                        return true;
+                    })
                     .filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString()
-                            .toLowerCase()
-                            .contains(keyword.toLowerCase()))
+                            .toLowerCase(java.util.Locale.ROOT)
+                            .contains(searchKeyword))
                     .limit(500)
-                    .map(path -> workspaceManager.getRoot().relativize(path).toString())
+                    .map(path -> root.relativize(path).toString().replace('\\\\', '/'))
                     .toList();
         }
     }
