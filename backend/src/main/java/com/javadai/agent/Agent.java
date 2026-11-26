@@ -61,6 +61,18 @@ public class Agent {
 
             IntentType intent = intentDetector.detect(instruction);
 
+            // Workspace and project-understanding requests must bypass deterministic skills/workflows.
+            // Otherwise they can be answered without consulting the live workspace or coding tools.
+            if (isWorkspaceRequest(instruction) || isProjectUnderstandingRequest(instruction)) {
+                String result = llmAgent.run(task, instruction, activeFilePath, activeFileContent);
+                if (result.startsWith("ERROR:")) {
+                    taskManager.failTask(task.getId(), result);
+                } else {
+                    taskManager.completeTask(task.getId(), result);
+                }
+                return task;
+            }
+
             var skill = skillRegistry.findSkill(instruction);
 
             if (skill.isPresent()) {
@@ -167,6 +179,23 @@ public class Agent {
         return task;
     }
 
+
+    private boolean isWorkspaceRequest(String instruction) {
+        String text = instruction == null ? "" : instruction.toLowerCase(java.util.Locale.ROOT);
+        return text.contains("workspace") || text.contains("فضای کاری");
+    }
+
+    private boolean isProjectUnderstandingRequest(String instruction) {
+        String text = instruction == null ? "" : instruction.toLowerCase(java.util.Locale.ROOT);
+        boolean mentionsProject = text.contains("backend") || text.contains("frontend")
+                || text.contains("angular") || text.contains("spring boot")
+                || text.contains("معماری") || text.contains("ساختار پروژه");
+        boolean asksToUnderstand = text.contains("تحلیل") || text.contains("بررسی")
+                || text.contains("بخوان") || text.contains("بخون") || text.contains("توضیح")
+                || text.contains("ارتباط") || text.contains("معماری") || text.contains("analyze")
+                || text.contains("inspect") || text.contains("explain") || text.contains("read");
+        return mentionsProject && asksToUnderstand;
+    }
 
     private String extractPath(String instruction) {
         Matcher matcher = Pattern.compile(
