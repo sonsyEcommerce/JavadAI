@@ -120,51 +120,12 @@ public class LlmAgent {
                     + (activeFileContent == null ? "" : activeFileContent);
         }
 
-        // Give the model a concrete, backend-generated snapshot for explicit folder-reading requests.
-        String normalizedInstruction = instruction == null ? "" : instruction.toLowerCase(Locale.ROOT);
-        boolean mentionsBothApps = normalizedInstruction.contains("backend") && normalizedInstruction.contains("frontend");
-        boolean mentionsStack = (normalizedInstruction.contains("angular") || normalizedInstruction.contains("spring boot")
-                || normalizedInstruction.contains("spring") || normalizedInstruction.contains("معماری"));
-        boolean asksForUnderstanding = normalizedInstruction.contains("بخوان") || normalizedInstruction.contains("بخون")
-                || normalizedInstruction.contains("بررسی") || normalizedInstruction.contains("تحلیل")
-                || normalizedInstruction.contains("توضیح") || normalizedInstruction.contains("معماری")
-                || normalizedInstruction.contains("ارتباط") || normalizedInstruction.contains("read")
-                || normalizedInstruction.contains("inspect") || normalizedInstruction.contains("analy")
-                || normalizedInstruction.contains("explain") || normalizedInstruction.contains("understand");
-        boolean asksToInspectProject = asksForUnderstanding && (mentionsBothApps || mentionsStack);
-        if (asksToInspectProject) {
-            try {
-                userContent += "\n\nBACKEND-GENERATED PROJECT STRUCTURE (not user-provided):"
-                        + "\n[backend]\n" + code.tree("backend")
-                        + "\n[frontend]\n" + code.tree("frontend")
-                        + "\n\nIMPORTANT PROJECT FILES (read directly by backend):";
-                for (String file : List.of(
-                        "backend/pom.xml",
-                        "backend/src/main/resources/application.yaml",
-                        "backend/src/main/resources/application.yml",
-                        "backend/src/main/java/com/javadai/agent/Agent.java",
-                        "backend/src/main/java/com/javadai/agent/AgentController.java",
-                        "backend/src/main/java/com/javadai/agent/llm/LlmAgent.java",
-                        "backend/src/main/java/com/javadai/agent/llm/OllamaClient.java",
-                        "frontend/package.json",
-                        "frontend/angular.json",
-                        "frontend/src/app/app.config.ts",
-                        "frontend/src/app/app.routes.ts",
-                        "frontend/src/app/core/services/agent-api.service.ts",
-                        "frontend/src/app/core/services/workspace-api.service.ts"
-                )) {
-                    try {
-                        String content = files.readFile(file);
-                        userContent += "\n\n--- " + file + " ---\n"
-                                + (content.length() > 10000 ? content.substring(0, 10000) + "\n...(truncated)" : content);
-                    } catch (Exception ignored) {
-                        // Optional configuration files differ between project layouts.
-                    }
-                }
-                userContent += "\n\nUse the supplied tree and file contents as source of truth. Read additional source files with tools before claiming full understanding.";
-            } catch (Exception e) {
-                userContent += "\\n\\nCould not read project folders: " + e.getMessage();
-            }
+        // Inspect the real workspace for folder-reading and project-understanding requests.
+        if (isProjectInspectionRequest(instruction) || isProjectOverviewQuestion(instruction)) {
+            String snapshot = buildProjectContext();
+            userContent += "\n\nLIVE PROJECT SNAPSHOT READ BY BACKEND:\n" + snapshot
+                    + "\nTreat this snapshot as the source of truth. Explain what the project does using concrete evidence from its files. "
+                    + "Do not ask for the workspace path; it is already verified by the backend.";
         }
 
         messages.add(msg("user", userContent));
@@ -174,6 +135,12 @@ public class LlmAgent {
                 messages.add(reply);
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> calls = (List<Map<String, Object>>) reply.get("tool_calls");
+                if (calls == null || calls.isEmpty()) {
+                    // Some local model builds print tool-call JSON as plain text instead of using
+                    // Ollama's structured tool_calls field. Recover that format instead of showing
+                    // raw JSON to the user.
+                    calls = parseTextToolCalls(String.valueOf(reply.getOrDefault("content", "")));
+                }
                 if (calls == null || calls.isEmpty()) {
                     String answer = String.valueOf(reply.getOrDefault("content", ""));
                     remember(instruction, answer);
@@ -205,6 +172,116 @@ public class LlmAgent {
         } catch (Exception e) {
             return "ERROR: Could not reach the local model. Is Ollama running and the model pulled? (" + e.getMessage() + ")";
         }
+    }
+
+    private boolean isProjectInspectionRequest(String instruction) {
+        String text = normalize(instruction);
+        boolean namesFolders = (text.contains("backend") || text.contains("بک") || text.contains("بک‌اند"))
+                && (text.contains("frontend") || text.contains("فرانت") || text.contains("فرانت‌اند"));
+        boolean readIntent = text.contains("بخوان") || text.contains("بخون") || text.contains("خواندن")
+                || text.contains("read") || text.contains("inspect") || text.contains("بررسی")
+                || text.contains("ساختار") || text.contains("پوشه");
+        return namesFolders && readIntent;
+    }
+
+    private boolean isProjectOverviewQuestion(String instruction) {
+        String text = normalize(instruction);
+        boolean aboutProject = text.contains("پروژه") || text.contains("project") || text.contains("کد");
+        boolean asksPurpose = text.contains("در مورد چیست") || text.contains("درباره چیست")
+                || text.contains("چیست") || text.contains("چه کاری") || text.contains("چه کاربردی")
+                || text.contains("هدف") || text.contains("what is") || text.contains("purpose")
+                || text.contains("what does") || text.contains("about");
+        return aboutProject && asksPurpose;
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.toLowerCase(Locale.ROOT)
+                .replace('ي', 'ی').replace('ك', 'ک');
+    }
+
+    private String buildProjectContext() {
+        StringBuilder snapshot = new StringBuilder();
+        try {
+            snapshot.append("Workspace: ").append(workspaceManager.getRoot()).append("\n");
+            snapshot.append("\nROOT TREE:\n").append(code.tree(""));
+        } catch (Exception e) {
+            snapshot.append("\nCould not read root tree: ").append(e.getMessage());
+        }
+        for (String folder : List.of("backend", "frontend")) {
+            try {
+                snapshot.append("\n\n").append(folder.toUpperCase(Locale.ROOT))
+                        .append(" TREE:\n").append(code.tree(folder));
+            } catch (Exception e) {
+                snapshot.append("\n").append(folder).append(" tree unavailable: ").append(e.getMessage());
+            }
+        }
+
+        LinkedHashSet<String> candidates = new LinkedHashSet<>(List.of(
+                "README.md", "readme.md", "backend/pom.xml", "frontend/package.json",
+                "frontend/angular.json", "backend/src/main/resources/application.yaml",
+                "backend/src/main/resources/application.yml", "backend/src/main/resources/application.properties"
+        ));
+        for (String name : List.of("README.md", "Application.java", "main.ts", "app.routes.ts", "app.config.ts")) {
+            try {
+                candidates.addAll(files.searchFiles(name));
+            } catch (Exception ignored) { }
+        }
+
+        snapshot.append("\n\nPROJECT FILE CONTENTS:");
+        int included = 0;
+        for (String path : candidates) {
+            if (included >= 14) break;
+            try {
+                String content = files.readFile(path);
+                if (content.length() > 7000) content = content.substring(0, 7000) + "\n...(truncated)";
+                snapshot.append("\n\n--- ").append(path).append(" ---\n").append(content);
+                included++;
+            } catch (Exception ignored) {
+                // Candidate files are optional; the actual tree remains authoritative.
+            }
+        }
+        return snapshot.toString();
+    }
+
+    private List<Map<String, Object>> parseTextToolCalls(String content) {
+        if (content == null || !content.contains("\"arguments\"")) return List.of();
+        List<Map<String, Object>> calls = new ArrayList<>();
+        int cursor = 0;
+        while (cursor < content.length()) {
+            int start = content.indexOf('{', cursor);
+            if (start < 0) break;
+            int depth = 0;
+            boolean quoted = false;
+            boolean escaped = false;
+            int end = -1;
+            for (int i = start; i < content.length(); i++) {
+                char ch = content.charAt(i);
+                if (quoted) {
+                    if (escaped) escaped = false;
+                    else if (ch == '\\\\') escaped = true;
+                    else if (ch == '"') quoted = false;
+                } else {
+                    if (ch == '"') quoted = true;
+                    else if (ch == '{') depth++;
+                    else if (ch == '}' && --depth == 0) { end = i + 1; break; }
+                }
+            }
+            if (end < 0) break;
+            String candidate = content.substring(start, end);
+            try {
+                com.fasterxml.jackson.databind.JsonNode node =
+                        new com.fasterxml.jackson.databind.ObjectMapper().readTree(candidate);
+                if (node.has("name") && node.has("arguments") && node.get("arguments").isObject()) {
+                    Map<String, Object> fn = new HashMap<>();
+                    fn.put("name", node.get("name").asText());
+                    fn.put("arguments", new com.fasterxml.jackson.databind.ObjectMapper()
+                            .convertValue(node.get("arguments"), Map.class));
+                    calls.add(Map.of("function", fn));
+                }
+            } catch (Exception ignored) { }
+            cursor = end;
+        }
+        return calls;
     }
 
     private boolean isWorkspacePathQuery(String instruction) {
