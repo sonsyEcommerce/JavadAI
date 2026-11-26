@@ -99,6 +99,11 @@ public class LlmAgent {
             }
         }
 
+        // Do not delegate a factual workspace-path query to the language model.
+        if (isWorkspacePathQuery(instruction)) {
+            return "مسیر فعلی فضای کاری (تأییدشده توسط Backend): " + workspaceManager.getRoot();
+        }
+
         List<Map<String, Object>> messages = new ArrayList<>();
 
         messages.add(msg("system", SYSTEM
@@ -117,11 +122,17 @@ public class LlmAgent {
 
         // Give the model a concrete, backend-generated snapshot for explicit folder-reading requests.
         String normalizedInstruction = instruction == null ? "" : instruction.toLowerCase(Locale.ROOT);
-        boolean asksToInspectBoth = (normalizedInstruction.contains("backend") && normalizedInstruction.contains("frontend"))
-                && (normalizedInstruction.contains("بخوان") || normalizedInstruction.contains("بخون")
-                    || normalizedInstruction.contains("بررسی") || normalizedInstruction.contains("read")
-                    || normalizedInstruction.contains("inspect"));
-        if (asksToInspectBoth) {
+        boolean mentionsBothApps = normalizedInstruction.contains("backend") && normalizedInstruction.contains("frontend");
+        boolean mentionsStack = (normalizedInstruction.contains("angular") || normalizedInstruction.contains("spring boot")
+                || normalizedInstruction.contains("spring") || normalizedInstruction.contains("معماری"));
+        boolean asksForUnderstanding = normalizedInstruction.contains("بخوان") || normalizedInstruction.contains("بخون")
+                || normalizedInstruction.contains("بررسی") || normalizedInstruction.contains("تحلیل")
+                || normalizedInstruction.contains("توضیح") || normalizedInstruction.contains("معماری")
+                || normalizedInstruction.contains("ارتباط") || normalizedInstruction.contains("read")
+                || normalizedInstruction.contains("inspect") || normalizedInstruction.contains("analy")
+                || normalizedInstruction.contains("explain") || normalizedInstruction.contains("understand");
+        boolean asksToInspectProject = asksForUnderstanding && (mentionsBothApps || mentionsStack);
+        if (asksToInspectProject) {
             try {
                 userContent += "\n\nBACKEND-GENERATED PROJECT STRUCTURE (not user-provided):"
                         + "\n[backend]\n" + code.tree("backend")
@@ -131,8 +142,16 @@ public class LlmAgent {
                         "backend/pom.xml",
                         "backend/src/main/resources/application.yaml",
                         "backend/src/main/resources/application.yml",
+                        "backend/src/main/java/com/javadai/agent/Agent.java",
+                        "backend/src/main/java/com/javadai/agent/AgentController.java",
+                        "backend/src/main/java/com/javadai/agent/llm/LlmAgent.java",
+                        "backend/src/main/java/com/javadai/agent/llm/OllamaClient.java",
                         "frontend/package.json",
-                        "frontend/angular.json"
+                        "frontend/angular.json",
+                        "frontend/src/app/app.config.ts",
+                        "frontend/src/app/app.routes.ts",
+                        "frontend/src/app/core/services/agent-api.service.ts",
+                        "frontend/src/app/core/services/workspace-api.service.ts"
                 )) {
                     try {
                         String content = files.readFile(file);
@@ -186,6 +205,14 @@ public class LlmAgent {
         } catch (Exception e) {
             return "ERROR: Could not reach the local model. Is Ollama running and the model pulled? (" + e.getMessage() + ")";
         }
+    }
+
+    private boolean isWorkspacePathQuery(String instruction) {
+        String text = instruction == null ? "" : instruction.toLowerCase(Locale.ROOT);
+        boolean workspace = text.contains("فضای کاری") || text.contains("workspace");
+        boolean asksPath = text.contains("مسیر") || text.contains("path") || text.contains("کجاست")
+                || text.contains("فعلی") || text.contains("current") || text.contains("where");
+        return workspace && asksPath && !isWorkspaceChangeRequest(instruction);
     }
 
     private boolean isWorkspaceChangeRequest(String instruction) {
