@@ -130,6 +130,35 @@ public class LlmAgent {
 
         messages.add(msg("user", userContent));
         try {
+            // Folder inspection and project overview already have a backend-read snapshot.
+            // Ask the model to analyze that snapshot without exposing tool-call JSON or
+            // allowing it to restart the conversation by asking for a workspace path.
+            if (isProjectInspectionRequest(instruction) || isProjectOverviewQuestion(instruction)) {
+                messages.add(msg("user",
+                        "Analyze the LIVE PROJECT SNAPSHOT already included above. "
+                        + "The backend has successfully accessed the workspace and supplied its real files. "
+                        + "Never ask for a path, never ask the user to provide files, and do not output tool-call JSON. "
+                        + "For a project overview, explain the product purpose, major features, backend architecture, "
+                        + "frontend architecture, and their integration. For a folder-reading request, confirm what "
+                        + "was inspected and summarize the actual structure. Clearly distinguish facts from unknowns."));
+                Map<String, Object> analysis = ollama.chat(messages, List.of());
+                String answer = String.valueOf(analysis.getOrDefault("content", "")).trim();
+                if (looksLikeWorkspacePathRequest(answer)) {
+                    messages.add(msg("assistant", answer));
+                    messages.add(msg("user",
+                            "That response is incorrect. The active workspace and its file contents are already "
+                            + "provided in the preceding message. Do not ask for a path. Use the supplied project "
+                            + "snapshot and describe the project now."));
+                    analysis = ollama.chat(messages, List.of());
+                    answer = String.valueOf(analysis.getOrDefault("content", "")).trim();
+                }
+                if (looksLikeWorkspacePathRequest(answer)) {
+                    answer = deterministicProjectSummary(instruction);
+                }
+                remember(instruction, answer);
+                return answer;
+            }
+
             for (int i = 0; i < MAX_STEPS; i++) {
                 Map<String, Object> reply = ollama.chat(messages, TOOLS);
                 messages.add(reply);
@@ -172,6 +201,21 @@ public class LlmAgent {
         } catch (Exception e) {
             return "ERROR: Could not reach the local model. Is Ollama running and the model pulled? (" + e.getMessage() + ")";
         }
+    }
+
+    private boolean looksLikeWorkspacePathRequest(String answer) {
+        String text = normalize(answer);
+        return (text.contains("لطفاً مسیر") || text.contains("لطفا مسیر")
+                || text.contains("مسیر فضای کاری را ارائه") || text.contains("provide the workspace path")
+                || text.contains("please provide the path"));
+    }
+
+    private String deterministicProjectSummary(String instruction) {
+        return "ساختار پروژه از مسیر Workspace توسط Backend خوانده شد: "
+                + workspaceManager.getRoot()
+                + "\n\nخلاصه فایل‌های واقعی در دسترس مدل قرار گرفت، اما مدل محلی نتوانست تحلیل قابل اتکایی تولید کند. "
+                + "برای جلوگیری از ارائه اطلاعات ساختگی، لازم است محتوای README، فایل pom.xml و package.json "
+                + "و فایل‌های ورودی برنامه بررسی شوند. این پاسخ به معنی تکمیل تحلیل معماری نیست.";
     }
 
     private boolean isProjectInspectionRequest(String instruction) {
