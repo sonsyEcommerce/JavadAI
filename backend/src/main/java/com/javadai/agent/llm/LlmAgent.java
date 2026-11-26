@@ -1,5 +1,6 @@
 package com.javadai.agent.llm;
 
+import com.javadai.agent.execution.ProjectExecutionTool;
 import com.javadai.agent.memory.MemoryService;
 import com.javadai.agent.memory.MemoryType;
 import com.javadai.agent.task.AgentTask;
@@ -55,6 +56,7 @@ public class LlmAgent {
     private final MemoryService memory;
     private final FileChangeProposalService proposals;
     private final WorkspaceManager workspaceManager;
+    private final ProjectExecutionTool projectExecution;
 
     public LlmAgent(
             OllamaClient ollama,
@@ -63,7 +65,8 @@ public class LlmAgent {
             CodeTool code,
             MemoryService memory,
             FileChangeProposalService proposals,
-            WorkspaceManager workspaceManager
+            WorkspaceManager workspaceManager,
+            ProjectExecutionTool projectExecution
     ) {
         this.ollama = ollama;
         this.files = files;
@@ -72,6 +75,7 @@ public class LlmAgent {
         this.memory = memory;
         this.proposals = proposals;
         this.workspaceManager = workspaceManager;
+        this.projectExecution = projectExecution;
     }
 
     public String run(AgentTask task, String instruction) {
@@ -390,11 +394,30 @@ public class LlmAgent {
                 case "create_directory" -> files.createDirectory(str(a, "path"));
                 case "write_file" -> files.writeFile(str(a, "path"), str(a, "content"));
                 case "run_command" -> commands.run(str(a, "command"));
+                case "run_project_check" -> runProjectCheck(str(a, "path"), str(a, "check"));
                 default -> "ERROR: unknown tool " + name;
             };
         } catch (Exception e) {
             return "ERROR: " + e.getMessage();
         }
+    }
+
+
+    private String runProjectCheck(String path, String check) {
+        var result = projectExecution.execute(path, check);
+        String status = result.successful() ? "SUCCESS" : "ERROR";
+        StringBuilder response = new StringBuilder(status)
+                .append(": project ").append(check == null || check.isBlank() ? "build" : check)
+                .append(result.timedOut() ? " timed out" : result.successful() ? " completed" : " failed")
+                .append(" (exit=").append(result.exitCode())
+                .append(", duration=").append(result.duration().toSeconds()).append("s)");
+        if (result.stdout() != null && !result.stdout().isBlank()) {
+            response.append("\\n").append(result.stdout());
+        }
+        if (result.stderr() != null && !result.stderr().isBlank()) {
+            response.append("\\nSTDERR:\\n").append(result.stderr());
+        }
+        return response.toString();
     }
 
     private String recall(String instruction) {
@@ -437,6 +460,7 @@ public class LlmAgent {
             tool("search_in_files", "Search text (class, method, keyword) across all source files", Map.of("text", s("text to find")), List.of("text")),
             tool("create_directory", "Create a directory", Map.of("path", s("relative path")), List.of("path")),
             tool("run_command", "Run an allow-listed build, test, or git verification command from the workspace root. Allowed examples: mvn -f backend/pom.xml test, npm --prefix frontend run build, git diff --check. No arbitrary shell commands.", Map.of("command", s("one exact allowed project command")), List.of("command")),
+            tool("run_project_check", "Run a safe build or test for a Maven or Angular project directory inside the workspace. Use path empty for workspace root; check must be build or test.", Map.of("path", s("Workspace-relative project directory; empty means workspace root"), "check", s("build or test")), List.of("path", "check")),
             tool("write_file", "Create or update a workspace file with complete UTF-8 source content. Use only after the user explicitly requested a code or file change. Never write outside workspace.", Map.of("path", s("workspace-relative file path"), "content", s("complete file content")), List.of("path", "content")),
             tool(
                     "propose_file_change",
