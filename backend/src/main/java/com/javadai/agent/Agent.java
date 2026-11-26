@@ -109,7 +109,7 @@ public class Agent {
                                 extractSearchKeyword(instruction));
 
                 case CREATE_PROJECT ->
-                        "Project creation is not implemented yet.";
+                        llmAgent.run(task, instruction, activeFilePath, activeFileContent);
 
                 case OPEN_APPLICATION ->
                         executeOpenApplication(instruction);
