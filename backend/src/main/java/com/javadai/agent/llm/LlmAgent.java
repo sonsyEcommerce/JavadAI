@@ -7,6 +7,7 @@ import com.javadai.agent.task.TaskStep;
 import com.javadai.agent.tools.FileTool;
 import com.javadai.agent.tools.WorkspaceCommandTool;
 import com.javadai.agent.workspace.FileChangeProposalService;
+import com.javadai.agent.workspace.WorkspaceManager;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -25,8 +26,14 @@ public class LlmAgent {
         You are JavadAI, a local assistant for a developer working on Windows.
         Reply in the user's language. You can inspect and change files ONLY inside the workspace using tools.
         You are an autonomous coding agent, not just a chat bot. Understand requests in Persian or English.
-        For project/code tasks, inspect the workspace before proposing a solution: call project_tree, then read relevant
-        build/config/source files and search usages. Follow existing architecture and conventions; do not guess file contents.
+        The current workspace path is supplied by the application. Never ask the user to repeat a workspace path that is already set.
+        If the user asks to change/set/switch the workspace path, call set_workspace immediately with the exact path from the request,
+        then call get_workspace to verify it and report the verified path. Do not say it succeeded unless the tool confirms it.
+        If the user asks what workspace is active, call get_workspace.
+        For project/code tasks, inspect the workspace before proposing a solution: call project_tree with path="" first.
+        If the user names top-level folders such as backend and frontend, call project_tree for each folder and read relevant
+        build/config/source files (pom.xml, package.json, angular.json, application config, main classes), then search usages.
+        Follow existing architecture and conventions; do not guess file contents.
         For code changes, explain the intended change internally, then use write_file with the complete updated content.
         Only change files relevant to the request. Preserve unrelated code and existing formatting.
         After changes, inspect the changed file(s) and run relevant project checks when a safe command tool is available.
@@ -47,6 +54,7 @@ public class LlmAgent {
     private final CodeTool code;
     private final MemoryService memory;
     private final FileChangeProposalService proposals;
+    private final WorkspaceManager workspaceManager;
 
     public LlmAgent(
             OllamaClient ollama,
@@ -54,7 +62,8 @@ public class LlmAgent {
             WorkspaceCommandTool commands,
             CodeTool code,
             MemoryService memory,
-            FileChangeProposalService proposals
+            FileChangeProposalService proposals,
+            WorkspaceManager workspaceManager
     ) {
         this.ollama = ollama;
         this.files = files;
@@ -62,6 +71,7 @@ public class LlmAgent {
         this.code = code;
         this.memory = memory;
         this.proposals = proposals;
+        this.workspaceManager = workspaceManager;
     }
 
     public String run(AgentTask task, String instruction) {
@@ -76,7 +86,10 @@ public class LlmAgent {
     ) {
         List<Map<String, Object>> messages = new ArrayList<>();
 
-        messages.add(msg("system", SYSTEM + recall(instruction)));
+        messages.add(msg("system", SYSTEM
+                + "\n\nACTIVE WORKSPACE (verified by backend): "
+                + workspaceManager.getRoot()
+                + recall(instruction)));
 
         String userContent = instruction;
 
@@ -130,6 +143,12 @@ public class LlmAgent {
     private String execute(String name, Map<String, Object> a) {
         try {
             return switch (name) {
+                case "get_workspace" -> "Current workspace: " + workspaceManager.getRoot();
+                case "set_workspace" -> {
+                    String requestedPath = str(a, "path");
+                    var updated = workspaceManager.setWorkspace(requestedPath);
+                    yield "SUCCESS: Workspace changed and verified: " + updated.get("path");
+                }
                 case "project_tree" -> code.tree(str(a, "path"));
                 case "list_files" -> String.join("\n", files.listFiles(str(a, "path")));
                 case "read_file" -> {
@@ -199,6 +218,8 @@ public class LlmAgent {
     private static Map<String, Object> s(String d) { return Map.of("type", "string", "description", d); }
 
     private static final List<Map<String, Object>> TOOLS = List.of(
+            tool("get_workspace", "Return the actual active workspace path from the backend. Use this before asking the user for a path.", Map.of(), List.of()),
+            tool("set_workspace", "Change the active workspace to the exact existing directory requested by the user, then verify it. Do not ask for a path if the user already supplied one.", Map.of("path", s("Exact absolute directory path supplied by the user")), List.of("path")),
             tool("project_tree", "Show the folder/file tree of a directory in the workspace (empty path = root)", Map.of("path", s("relative directory")), List.of()),
             tool("list_files", "List files in one directory", Map.of("path", s("relative directory")), List.of()),
             tool("read_file", "Read a text file", Map.of("path", s("relative file path")), List.of("path")),
