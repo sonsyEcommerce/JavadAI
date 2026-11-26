@@ -237,7 +237,7 @@
       }
 
       @if (activeMode() === 'workspace') {
-        <app-workspace />
+        <app-workspace (editorContextChange)="setEditorContext($event)" />
       }
 
       @if (activeMode() === 'chat' && messages().length > 0) {
