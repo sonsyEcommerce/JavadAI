@@ -306,7 +306,7 @@ public class LlmAgent {
                 char ch = content.charAt(i);
                 if (quoted) {
                     if (escaped) escaped = false;
-                    else if (ch == '\\\\') escaped = true;
+                    else if (ch == '\\') escaped = true;
                     else if (ch == '"') quoted = false;
                 } else {
                     if (ch == '"') quoted = true;
