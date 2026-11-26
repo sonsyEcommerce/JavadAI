@@ -23,7 +23,7 @@ export interface WorkspaceFilesResponse {
 })
 export class WorkspaceApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/workspace';
+  private readonly baseUrl = 'http://localhost:8081/api/workspace';
 
   getWorkspace(): Observable<WorkspaceResponse> {
     return this.http.get<WorkspaceResponse>(this.baseUrl);
