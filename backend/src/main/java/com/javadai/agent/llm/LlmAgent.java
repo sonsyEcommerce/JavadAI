@@ -5,6 +5,7 @@ import com.javadai.agent.memory.MemoryType;
 import com.javadai.agent.task.AgentTask;
 import com.javadai.agent.task.TaskStep;
 import com.javadai.agent.tools.FileTool;
+import com.javadai.agent.tools.WorkspaceCommandTool;
 import com.javadai.agent.workspace.FileChangeProposalService;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +43,7 @@ public class LlmAgent {
 
     private final OllamaClient ollama;
     private final FileTool files;
+    private final WorkspaceCommandTool commands;
     private final CodeTool code;
     private final MemoryService memory;
     private final FileChangeProposalService proposals;
@@ -49,12 +51,14 @@ public class LlmAgent {
     public LlmAgent(
             OllamaClient ollama,
             FileTool files,
+            WorkspaceCommandTool commands,
             CodeTool code,
             MemoryService memory,
             FileChangeProposalService proposals
     ) {
         this.ollama = ollama;
         this.files = files;
+        this.commands = commands;
         this.code = code;
         this.memory = memory;
         this.proposals = proposals;
@@ -155,6 +159,7 @@ public class LlmAgent {
                 case "search_in_files" -> code.grep(str(a, "text"));
                 case "create_directory" -> files.createDirectory(str(a, "path"));
                 case "write_file" -> files.writeFile(str(a, "path"), str(a, "content"));
+                case "run_command" -> commands.run(str(a, "command"));
                 default -> "ERROR: unknown tool " + name;
             };
         } catch (Exception e) {
@@ -199,6 +204,7 @@ public class LlmAgent {
             tool("read_file", "Read a text file", Map.of("path", s("relative file path")), List.of("path")),
             tool("search_in_files", "Search text (class, method, keyword) across all source files", Map.of("text", s("text to find")), List.of("text")),
             tool("create_directory", "Create a directory", Map.of("path", s("relative path")), List.of("path")),
+            tool("run_command", "Run an allow-listed build, test, or git verification command from the workspace root. Allowed examples: mvn -f backend/pom.xml test, npm --prefix frontend run build, git diff --check. No arbitrary shell commands.", Map.of("command", s("one exact allowed project command")), List.of("command")),
             tool("write_file", "Create or update a workspace file with complete UTF-8 source content. Use only after the user explicitly requested a code or file change. Never write outside workspace.", Map.of("path", s("workspace-relative file path"), "content", s("complete file content")), List.of("path", "content")),
             tool(
                     "propose_file_change",
