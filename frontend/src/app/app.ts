@@ -40,6 +40,7 @@ export class App {
   protected readonly messages = signal<ChatMessage[]>([]);
   protected readonly messageInput = signal('');
   protected readonly terminalInput = signal('');
+  protected readonly editorContext = signal({ path: '', content: '' });
 
   protected readonly terminalHistory = signal<string[]>([
     'JavadAI Terminal v1.0',
@@ -99,7 +100,12 @@ export class App {
     this.messageInput.set('');
     this.isSending.set(true);
 
-    this.agentApi.ask(content).subscribe({
+    const editor = this.editorContext();
+    const request = editor.path
+      ? this.agentApi.askWithContext(content, editor.path, editor.content)
+      : this.agentApi.ask(content);
+
+    request.subscribe({
 
       next: response => {
         const task = response as AgentTaskResponse;
@@ -145,6 +151,10 @@ export class App {
         this.isSending.set(false);
       },
     });
+  }
+
+  protected setEditorContext(context: { path: string; content: string }): void {
+    this.editorContext.set(context);
   }
 
   protected handleComposerKeydown(event: KeyboardEvent): void {
