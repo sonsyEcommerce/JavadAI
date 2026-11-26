@@ -109,16 +109,10 @@ public class Agent {
                 case LIST_FILES ->
                         toolExecutor.executeListFiles("");
 
-                case READ_FILE ->
-                        toolExecutor.executeReadFile(
-                                extractPath(instruction));
-
-                case WRITE_FILE ->
-                        executeWrite(instruction);
-
-                case SEARCH_FILES ->
-                        toolExecutor.executeSearchFiles(
-                                extractSearchKeyword(instruction));
+                // Delegate file/code requests to the LLM agent so it can resolve paths
+                // from project context and perform coherent multi-file coding tasks.
+                case READ_FILE, WRITE_FILE, SEARCH_FILES ->
+                        llmAgent.run(task, instruction, activeFilePath, activeFileContent);
 
                 case CREATE_PROJECT ->
                         llmAgent.run(task, instruction, activeFilePath, activeFileContent);
