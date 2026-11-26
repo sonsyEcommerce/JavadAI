@@ -164,7 +164,7 @@ public class FileTool {
                             .toLowerCase(java.util.Locale.ROOT)
                             .contains(searchKeyword))
                     .limit(500)
-                    .map(path -> root.relativize(path).toString().replace('\\\\', '/'))
+                    .map(path -> root.relativize(path).toString().replace('\\', '/'))
                     .toList();
         }
     }
