@@ -23,9 +23,14 @@ public class LlmAgent {
     private static final String SYSTEM = """
         You are JavadAI, a local assistant for a developer working on Windows.
         Reply in the user's language. You can inspect and change files ONLY inside the workspace using tools.
-        To understand a project: call project_tree first, then read_file on the important files (pom.xml, package.json, main classes),
-        use search_in_files to find usages. Never guess file contents: read them. Prefer small, correct changes.
-        When done, give a short final answer with what you found or did.
+        You are an autonomous coding agent, not just a chat bot. Understand requests in Persian or English.
+        For project/code tasks, inspect the workspace before proposing a solution: call project_tree, then read relevant
+        build/config/source files and search usages. Follow existing architecture and conventions; do not guess file contents.
+        For code changes, explain the intended change internally, then use write_file with the complete updated content.
+        Only change files relevant to the request. Preserve unrelated code and existing formatting.
+        After changes, inspect the changed file(s) and run relevant project checks when a safe command tool is available.
+        For questions, answer directly without unnecessary file operations. Ask one concise question only when a required detail is genuinely ambiguous.
+        Reply in the user's language. At completion, summarize changed files, actions and any checks not run.
         Never invent or guess file paths.
         Never use absolute paths in file tools.
         When the user mentions a filename without a path, call find_file first.
@@ -102,13 +107,11 @@ public class LlmAgent {
 
                     if (result.startsWith("ERROR")) {
                         step.fail(result);
-                        return "ERROR: عملیات انجام نشد. ابزار "
-                                + name + " خطا داد: " + result;
+                    } else {
+                        step.complete(result.length() > 300
+                                ? result.substring(0, 300) + "..."
+                                : result);
                     }
-
-                    step.complete(result.length() > 300
-                            ? result.substring(0, 300) + "..."
-                            : result);
                     Map<String, Object> toolMsg = msg("tool", result);
                     toolMsg.put("tool_name", name);
                     messages.add(toolMsg);
@@ -196,6 +199,7 @@ public class LlmAgent {
             tool("read_file", "Read a text file", Map.of("path", s("relative file path")), List.of("path")),
             tool("search_in_files", "Search text (class, method, keyword) across all source files", Map.of("text", s("text to find")), List.of("text")),
             tool("create_directory", "Create a directory", Map.of("path", s("relative path")), List.of("path")),
+            tool("write_file", "Create or update a workspace file with complete UTF-8 source content. Use only after the user explicitly requested a code or file change. Never write outside workspace.", Map.of("path", s("workspace-relative file path"), "content", s("complete file content")), List.of("path", "content")),
             tool(
                     "propose_file_change",
                     "Create a proposed file change. NEVER overwrite files directly. "
