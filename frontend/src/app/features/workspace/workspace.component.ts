@@ -3,7 +3,9 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   inject,
+  Output,
   OnDestroy,
   OnInit,
   signal,
@@ -33,6 +35,8 @@ interface OpenFileTab {
   styleUrl: './workspace.component.scss',
 })
 export class WorkspaceComponent implements OnInit, AfterViewInit, OnDestroy {
+  @Output() readonly editorContextChange = new EventEmitter<{ path: string; content: string }>();
+
   private readonly api = inject(WorkspaceApiService);
   private readonly monacoLoader = inject(MonacoLoaderService);
 
@@ -150,6 +154,7 @@ export class WorkspaceComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.selectedFilePath() === path) {
         this.fileContent.set(currentContent);
         this.fileSaved.set(false);
+        this.editorContextChange.emit({ path, content: currentContent });
       }
     });
 
@@ -264,6 +269,7 @@ export class WorkspaceComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.selectedFilePath.set(result.path);
         this.fileContent.set(result.content);
+        this.editorContextChange.emit({ path: result.path, content: result.content });
         this.fileLoading.set(false);
         this.fileSaved.set(false);
 
@@ -289,6 +295,7 @@ export class WorkspaceComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.selectedFilePath.set(path);
     this.fileContent.set(this.models.get(path)?.getValue() ?? tab.content);
+    this.editorContextChange.emit({ path, content: this.fileContent() });
     this.fileSaved.set(false);
     this.fileError.set('');
 
@@ -323,6 +330,7 @@ export class WorkspaceComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.selectedFilePath.set('');
         this.fileContent.set('');
+        this.editorContextChange.emit({ path: '', content: '' });
         this.fileSaved.set(false);
       }
     }
