@@ -412,10 +412,10 @@ public class LlmAgent {
                 .append(" (exit=").append(result.exitCode())
                 .append(", duration=").append(result.duration().toSeconds()).append("s)");
         if (result.stdout() != null && !result.stdout().isBlank()) {
-            response.append("\\n").append(result.stdout());
+            response.append("\n").append(result.stdout());
         }
         if (result.stderr() != null && !result.stderr().isBlank()) {
-            response.append("\\nSTDERR:\\n").append(result.stderr());
+            response.append("\nSTDERR:\n").append(result.stderr());
         }
         return response.toString();
     }
