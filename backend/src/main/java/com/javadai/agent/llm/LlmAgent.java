@@ -119,7 +119,7 @@ public class LlmAgent {
             }
             return "Step limit reached. Please make the request more specific.";
         } catch (Exception e) {
-            return "Could not reach the local model. Is Ollama running and the model pulled? (" + e.getMessage() + ")";
+            return "ERROR: Could not reach the local model. Is Ollama running and the model pulled? (" + e.getMessage() + ")";
         }
     }
 
@@ -202,8 +202,7 @@ public class LlmAgent {
             tool("write_file", "Create or update a workspace file with complete UTF-8 source content. Use only after the user explicitly requested a code or file change. Never write outside workspace.", Map.of("path", s("workspace-relative file path"), "content", s("complete file content")), List.of("path", "content")),
             tool(
                     "propose_file_change",
-                    "Create a proposed file change. NEVER overwrite files directly. "
-                            + "The user must approve the proposal before it is applied.",
+                    "Create a reviewable proposal when the user asks to review changes before applying them. Do not apply the proposal automatically.",
                     Map.of(
                             "path", s("Workspace-relative file path"),
                             "content", s("Complete proposed file content")
